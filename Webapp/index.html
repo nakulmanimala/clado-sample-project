@@ -5,57 +5,84 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 600px;
+            max-width: 800px;
             margin: 40px auto;
             padding: 20px;
-            background-color: #e6f3ff;  /* Light blue background */
+            background-color: #e6f3ff;
         }
-        div {
+        .tab-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .tabs {
+            display: flex;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: -2px;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        div.form-group {
             margin-bottom: 20px;
-            background-color: white;    /* White container background */
-            padding: 20px;              /* Added padding */
-            border-radius: 8px;         /* Rounded corners */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);  /* Subtle shadow */
         }
         label {
             display: block;
             margin-bottom: 5px;
-            color: #2c3e50;            /* Darker text color */
-            font-weight: 600;          /* Bolder font */
-            font-size: 16px;           /* Larger font size */
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 16px;
         }
         input[type="text"], textarea {
             width: 100%;
-            padding: 12px;             /* More padding */
-            border: 2px solid #bdc3c7;  /* Thicker border */
-            border-radius: 6px;         /* More rounded corners */
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
             box-sizing: border-box;
             font-size: 14px;
-            transition: border-color 0.3s;  /* Smooth border transition */
+            transition: border-color 0.3s;
         }
         input[type="text"]:focus, textarea:focus {
-            border-color: #3498db;      /* Blue border on focus */
+            border-color: #3498db;
             outline: none;
         }
         textarea {
             resize: vertical;
-            min-height: 100px;          /* Minimum height */
+            min-height: 100px;
         }
         button {
-            background-color: #3498db;   /* Blue button */
+            background-color: #3498db;
             color: white;
-            padding: 12px 24px;         /* Larger padding */
+            padding: 12px 24px;
             border: none;
-            border-radius: 6px;         /* More rounded corners */
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: 600;           /* Bold text */
+            font-weight: 600;
             transition: all 0.3s;
-            width: 100%;                /* Full width button */
+            width: 100%;
         }
         button:hover {
-            background-color: #2980b9;  /* Darker blue on hover */
-            transform: translateY(-2px); /* Slight lift effect */
+            background-color: #2980b9;
+            transform: translateY(-2px);
         }
         .popup {
             display: none;
@@ -75,25 +102,107 @@
             from { opacity: 0; transform: translate(-50%, -60%); }
             to { opacity: 1; transform: translate(-50%, -50%); }
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
-    <div>
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
+    <div class="tab-container">
+        <div class="tabs">
+            <button class="tab active" onclick="openTab('formTab')">Input Form</button>
+            <button class="tab" onclick="openTab('dataTab')">View Data</button>
+        </div>
+
+        <div id="formTab" class="tab-content active">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit" onclick="submitForm()">Submit</button>
+            </div>
+        </div>
+
+        <div id="dataTab" class="tab-content">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div>
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" rows="4" required></textarea>
-    </div>
-    <div>
-        <button type="submit" onclick="submitForm()">Submit</button>
-    </div>
+
     <div id="successPopup" class="popup">
         Form submitted successfully!
     </div>
 
     <script>
+        function openTab(tabName) {
+            const tabs = document.getElementsByClassName('tab');
+            const contents = document.getElementsByClassName('tab-content');
+            
+            for (let tab of tabs) {
+                tab.classList.remove('active');
+            }
+            for (let content of contents) {
+                content.classList.remove('active');
+            }
+            
+            document.querySelector(`button[onclick="openTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'dataTab') {
+                fetchData();
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/data');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                const tbody = document.querySelector('#dataTable tbody');
+                tbody.innerHTML = '';
+                
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.description}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
         async function submitForm() {
             const name = document.getElementById('name').value;
             const description = document.getElementById('description').value;
@@ -119,14 +228,11 @@
                     const data = await response.json();
                     console.log('Success:', data);
                     
-                    // Show popup
                     successPopup.style.display = 'block';
-                    // Hide popup after 3 seconds
                     setTimeout(() => {
                         successPopup.style.display = 'none';
                     }, 3000);
                     
-                    // Clear the form
                     document.getElementById('name').value = '';
                     document.getElementById('description').value = '';
                 } catch (error) {
@@ -137,6 +243,9 @@
                 alert('Please fill in all fields');
             }
         }
+
+        // Initial data fetch
+        fetchData();
     </script>
 </body>
 </html>
